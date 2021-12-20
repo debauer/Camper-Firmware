@@ -9,6 +9,10 @@
 #include "heater_ctl.h"
 #include "cppQueue.h"
 #include "pinout.h"
+#include "fona_dummy.h"
+
+#define DEBUG
+#define SIM808_DUMMY
 
 #define SMS_QUEUE_SIZE 20
 #define SMS_LENGHT 250
@@ -22,17 +26,22 @@ typedef struct sms_type {
 class Heater_Ctl;
 
 #ifdef GLOBAL_INIT
-HardwareSerial *fonaSerial = &Serial2;
-Adafruit_FONA sim808 = Adafruit_FONA(SIM808_RESET);
-cppQueue SMS_Queue = cppQueue(sizeof(SMS), SMS_QUEUE_SIZE, FIFO);
-Heater_Ctl heater = Heater_Ctl();
-char temperature = 20.0;
+    #ifdef SIM808_DUMMY
+        HardwareSerial *fonaSerial = &Serial1;
+        fona_dummy sim808 = fona_dummy();
+    #else
+        HardwareSerial *fonaSerial = &Serial2;
+        Adafruit_FONA sim808 = Adafruit_FONA(SIM808_RESET);
+    #endif
+    cppQueue SMS_Queue = cppQueue(sizeof(SMS), SMS_QUEUE_SIZE, FIFO);
+    Heater_Ctl heater = Heater_Ctl();
+    char temperature = 20.0;
 #else
-extern HardwareSerial *fonaSerial;
-extern Adafruit_FONA sim808;
-extern cppQueue SMS_Queue;
-extern Heater_Ctl heater;
-extern char temperature;
+    extern HardwareSerial *fonaSerial;
+    extern Adafruit_FONA sim808;
+    extern cppQueue SMS_Queue;
+    extern Heater_Ctl heater;
+    extern char temperature;
 #endif
 
 #endif //SIM808_GLOBAL_H
