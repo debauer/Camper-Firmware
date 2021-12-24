@@ -5,10 +5,10 @@
 #include "heater_ctl.h"
 
 Heater_Ctl::Heater_Ctl() {
-    target_temperature = DETAULT_TEMPERATURE;
-    state = OFF;
+    target_temperature = HEATER_DETAULT_TEMPERATURE;
+    system_status.setHeaterState(HEATER_OFF);
     output_pin = -1;
-    action = nothing;
+    action = HEATER_DO_NOTHING;
     temperature_control = false;
 
 }
@@ -19,15 +19,16 @@ void Heater_Ctl::begin(char pin) {
 }
 
 void Heater_Ctl::off() {
-    action = turn_off;
+    action = HEATER_TURN_OFF;
 }
 
 void Heater_Ctl::on() {
-    action = nothing;
+    action = HEATER_DO_NOTHING;
 }
 
 void Heater_Ctl::loop() {
-    static State cached_state = INITIAL_STATE;
+    static Heater_State cached_state = HEATER_OFF;
+    Heater_State state = system_status.getHeaterState();
     if (state != cached_state){
         Serial.println("HEATER_CTL: heater state has changed");
         Serial.print("HEATER_CTL: old - ");
@@ -37,49 +38,51 @@ void Heater_Ctl::loop() {
         cached_state = state;
     }
     // state maschine override
-    if(action == turn_off){
-        state = OFF;
-        action = nothing;
+    if(action == HEATER_TURN_OFF){
+        state = HEATER_OFF;
+        action = HEATER_DO_NOTHING;
     }
 
     switch(state){
         case ON_T_HIGH:
-            if(temperature - TEMPERATURE_HISTERESIS < DETAULT_TEMPERATURE){
+            if(temperature - HEATER_TEMPERATURE_HISTERESIS < HEATER_DETAULT_TEMPERATURE){
                 state = ON_T_OK;
             }
 
             break;
 
         case ON_T_OK:
-            if(temperature > DETAULT_TEMPERATURE){
+            if(temperature > HEATER_DETAULT_TEMPERATURE){
                 state = ON_T_HIGH;
             }
             break;
 
-        case OFF:
+        case HEATER_OFF:
         default:
-            if(action == turn_on){
+            if(action == HEATER_TURN_ON){
                 if(temperature_control){
                     // to make sure the relai stays off if the temperature is allready to high
                     state = ON_T_HIGH;
                 }else{
-                    state = ON_PERMANENTLY;
+                    state = HEATER_ON_PERMANENTLY;
                 }
-                action = nothing;
+                action = HEATER_DO_NOTHING;
             }
             break;
     }
 
     switch(state){
         case ON_T_OK:
-        case ON_PERMANENTLY:
+        case HEATER_ON_PERMANENTLY:
             digitalWrite(output_pin, HIGH);
             break;
 
         default:
-        case OFF:
+        case HEATER_OFF:
         case ON_T_HIGH:
             digitalWrite(output_pin, LOW);
             break;
     }
+
+    system_status.setHeaterState(state);
 }

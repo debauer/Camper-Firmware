@@ -1,11 +1,13 @@
-//
+//class Heater_Ctl
 // Created by debauer on 20.12.21.
 //
 
 #ifndef SIM808_FONA_DUMMY_H
 #define SIM808_FONA_DUMMY_H
 
-#import "global.h"
+class fona_dummy;
+
+#include "global.h"
 
 class fona_dummy {
 public:

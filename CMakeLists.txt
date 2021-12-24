@@ -30,4 +30,4 @@ add_custom_target(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_executable(Z_DUMMY_TARGET ${SRC_LIST} src/fona_dummy.cpp src/fona_dummy.h)
+add_executable(Z_DUMMY_TARGET ${SRC_LIST} src/debug/fona_dummy.cpp src/debug/fona_dummy.h test/test_sim808.cpp src/status.cpp src/status.h src/enum.h src/struct.h src/test.cpp)

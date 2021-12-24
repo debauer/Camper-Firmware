@@ -5,11 +5,16 @@
 #define SIM808_GLOBAL_H
 
 #include "Arduino.h"
+#include "defines.h"
+#include "enum.h"
+#include "struct.h" // after enum!
 #include "Adafruit_FONA.h"
 #include "heater_ctl.h"
 #include "cppQueue.h"
-#include "pinout.h"
-#include "fona_dummy.h"
+#include "status.h"
+#ifdef UNIT_TEST
+#include "debug/fona_dummy.h"
+#endif
 
 #define DEBUG
 #define SIM808_DUMMY
@@ -18,30 +23,33 @@
 #define SMS_LENGHT 250
 #define SMS_PHONE_NUMBER_LENGHT 32
 
-typedef struct sms_type {
-	char sender[SMS_PHONE_NUMBER_LENGHT];
-	char msg[SMS_LENGHT];
-} SMS;
 
 class Heater_Ctl;
 
 #ifdef GLOBAL_INIT
-    #ifdef SIM808_DUMMY
-        HardwareSerial *fonaSerial = &Serial1;
-        fona_dummy sim808 = fona_dummy();
+    HardwareSerial *fonaSerial = &Serial2;
+    #ifdef UNIT_TEST
+        fona_dummy fona = fona_dummy();
     #else
-        HardwareSerial *fonaSerial = &Serial2;
-        Adafruit_FONA sim808 = Adafruit_FONA(SIM808_RESET);
+        Adafruit_FONA fona = Adafruit_FONA(SIM808_RESET);
     #endif
+        System_Status system_status = System_Status();
     cppQueue SMS_Queue = cppQueue(sizeof(SMS), SMS_QUEUE_SIZE, FIFO);
     Heater_Ctl heater = Heater_Ctl();
+    SIM808 sim808 = SIM808();
     char temperature = 20.0;
 #else
     extern HardwareSerial *fonaSerial;
-    extern Adafruit_FONA sim808;
+    #ifdef UNIT_TEST
+        extern fona_dummy sim808;
+    #else
+        extern Adafruit_FONA fona;
+    #endif
     extern cppQueue SMS_Queue;
     extern Heater_Ctl heater;
     extern char temperature;
+    extern System_Status system_status;
+    extern SIM808 sim808;
 #endif
 
 #endif //SIM808_GLOBAL_H
