@@ -12,10 +12,9 @@ class SIM808;
 
 
 #define SMS_QUEUE_SIZE 20
-#define SMS_LENGHT 250
+#define SMS_LENGHT 160
 #define SMS_PHONE_NUMBER_LENGHT 32
-#define SIM808_SMS_SLOT_COUNT 8
-#define SIM808_SMS_BUFFERSIZE 1024
+#define SIM808_SMS_BUFFERSIZE (1024*2)
 
 #ifdef UNIT_TEST
     #define FONA_LIB fona_dummy
@@ -35,8 +34,8 @@ enum SMS_Status{
 struct SMS {
   int slot;
   SMS_Status status;
-  char number[20];
-  char message[180];
+  char number[SMS_PHONE_NUMBER_LENGHT];
+  char message[SMS_LENGHT];
   char datetime[20];
 } ;
 

@@ -112,7 +112,7 @@ void SIM808::send_sms(char *number, char *sms_text){
 
 #define TIMEOUT 1000
 char SMS_buffer[SIM808_SMS_BUFFERSIZE];
-SMS sms[10];
+SMS sms[SMS_QUEUE_SIZE];
 
 // incoming message looks like:
 // +CMGL: 11,"REC UNREAD","+49123456789","","21/11/15,21:47:27+04"\n
@@ -144,28 +144,34 @@ void SIM808::parse_sms(uint16_t msg_size){
 
             if (SMS_buffer[i] == 'R'){
                 if(SMS_buffer[i+4] == 'U'){
+                    sms->status = SMS_REC_UNREAD;
                     Serial.println("SMS_REC_UNREAD");
                     i = i + 10;
                 }
                 if(SMS_buffer[i+4] == 'R'){
+                    sms->status = SMS_REC_READ;
                     Serial.println("SMS_REC_READ");
                     i = i + 8;
                 }
             }
             else if (SMS_buffer[i] == 'S'){
                 if(SMS_buffer[i+4] == 'U'){
+                    sms->status = SMS_STO_UNSENT;
                     Serial.println("SMS_STO_UNSENT");
                     i = i + 10;
                 }
                 if(SMS_buffer[i+4] == 'S'){
+                    sms->status = SMS_STO_SENT;
                     Serial.println("SMS_STO_SENT");
                     i = i + 8;
                 }
             }
             else if (SMS_buffer[i] == 'A'){
+                sms->status = SMS_ALL;
                 Serial.println("SMS_ALL");
                 i = i + 7;
             }else{
+                sms->status = SMS_UNDEF;
                 Serial.println("UNKNOWN");
             }
 

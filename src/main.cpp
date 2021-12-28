@@ -2,9 +2,8 @@
 #include "global.h"
 #undef GLOBAL_INIT
 
-int loopcounter = 0;
-hw_timer_t * hw_timer0 = NULL;
-hw_timer_t * hw_timer1 = NULL;
+hw_timer_t * hw_timer0 = nullptr;
+hw_timer_t * hw_timer1 = nullptr;
 
 void IRAM_ATTR sec_timer() {
     // every 1ms
@@ -30,12 +29,13 @@ void setup() {
   // print the Message on the LCD.
     lcd.print( "init" );
     hw_timer0 = timerBegin(0, 80, true);
-    hw_timer1 = timerBegin(1, 80, true);
     timerAttachInterrupt(hw_timer0, &sec_timer, true);
-    timerAttachInterrupt(hw_timer1, &ms_timer, true);
-    timerAlarmWrite(hw_timer0, 1000000, true); // 1000000 == 1s
-    timerAlarmWrite(hw_timer1, 1000, true); // 1000 == 1ms
+    timerAlarmWrite(hw_timer0, TIMER_1S, true);
     timerAlarmEnable(hw_timer0);
+
+    hw_timer1 = timerBegin(1, 80, true);
+    timerAttachInterrupt(hw_timer1, &ms_timer, true);
+    timerAlarmWrite(hw_timer1, TIMER_100MS, true);
     timerAlarmEnable(hw_timer1);
 }
 #endif

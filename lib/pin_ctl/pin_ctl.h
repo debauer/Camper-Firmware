@@ -27,7 +27,7 @@ class pin_ctl {
         bool active_timer;
         bool active;
         bool invert_pin;
-        void set_pin(bool state);
+        void set_pin(bool state) const;
     public:
         pin_ctl();
         void loop();

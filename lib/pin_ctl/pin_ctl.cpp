@@ -54,7 +54,7 @@ void pin_ctl::timer(){
     }
 }
 
-void pin_ctl::set_pin(bool state){
+void pin_ctl::set_pin(bool state) const{
     digitalWrite(output_pin, invert_pin ^ state);
 }
 
