@@ -4,7 +4,7 @@
 
 #include "sim808.h"
 
-void SIM808::power_on(){
+void SIM808::power_on() const{
     Serial.println(F("SIM808 power_on start"));
     digitalWrite(_pin_power, LOW);
     delay(2000);
@@ -52,28 +52,28 @@ void SIM808::begin(FONA_LIB *adafruit_fona, HardwareSerial *serial, unsigned lon
 
 int SIM808::update_rssi(){
     uint8_t n = fona->getRSSI();
-    int8_t r;
+    int r;
     if (n == 0) r = -115;
     if (n == 1) r = -111;
     if (n == 31) r = -52;
     if ((n >= 2) && (n <= 30)) {
-      r = map(n, 2, 30, -110, -54);
+      r = (int) map(n, 2, 30, -110, -54);
     }
     _rssi = r;
     return _rssi;
 }
 
-int SIM808::get_rssi(){
+int SIM808::get_rssi() const{
     return _rssi;
 }
 
 Network_State SIM808::update_network_status(){
-    network_state = static_cast<Network_State>(fona->getNetworkStatus());
-    return network_state;
+    _network_state = static_cast<Network_State>(fona->getNetworkStatus());
+    return _network_state;
 }
 
 Network_State SIM808::get_network_state(){
-    return network_state;
+    return _network_state;
 }
 
 void SIM808::delete_sms(int slot){
@@ -225,6 +225,8 @@ void SIM808::analyze_sms(){
     for(int i = 0; i < SMS_QUEUE_SIZE; i++){
         if(_sms[i].slot){
 
+
+            // delete_sms(_sms[i].slot);
         }
     }
 }
@@ -249,10 +251,10 @@ void SIM808::poll_sms(){
             break;
         }
         while (fonaSerial->available()) {
-            char c = fonaSerial->read();
+            char c = (char) fonaSerial->read();
             if (c == '\r')
                 continue;
-            _sms_buffer[replyidx] = c;
+            _sms_buffer[replay_lenght] = c;
             replay_lenght++;
             timeout = TIMEOUT;
         }
@@ -265,7 +267,7 @@ void SIM808::poll_sms(){
 void SIM808::loop(){
     update_network_status();
     update_rssi();
-    if(network_state == REGISTERED){
+    if(_network_state == REGISTERED){
         // read sms
     }
 }

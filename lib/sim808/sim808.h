@@ -52,11 +52,11 @@ class SIM808 {
 public:
     // FUNCTIONS
     void reset(bool soft = false);
-    void power_on();
+    void power_on() const;
     void begin(FONA_LIB *adafruit_fona, HardwareSerial *serial, unsigned long baud, int pin_power, int pin_status, int pin_reset, int pin_reset_relay);
     void loop();
 
-    int get_rssi();
+    int get_rssi() const;
     Network_State get_network_state();
     void print_imei();
 
@@ -80,20 +80,20 @@ protected:
     void clear_sms_cache();
 
     // VARS
-    Network_State network_state;
-    int _rssi;
+    Network_State _network_state;
+    int _rssi{};
     char _imei[16] = {0}; // MUST use a 16 character buffer for IMEI!
 
     // PINS
-    int _pin_power;
-    int _pin_status;
-    int _pin_reset_relay;
-    int _pin_reset;
-    char _sms_buffer[SIM808_SMS_BUFFERSIZE];
-    SMS _sms[SMS_QUEUE_SIZE];
+    int _pin_power{};
+    int _pin_status{};
+    int _pin_reset_relay{};
+    int _pin_reset{};
+    char _sms_buffer[SIM808_SMS_BUFFERSIZE]{};
+    SMS _sms[SMS_QUEUE_SIZE]{};
 
-    HardwareSerial *fonaSerial;
-    Adafruit_FONA *fona;
+    HardwareSerial *fonaSerial{};
+    Adafruit_FONA *fona{};
 };
 
 #endif //SIM808_H
