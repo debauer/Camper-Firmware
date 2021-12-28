@@ -4,14 +4,21 @@
 
 #include "fona_dummy.h"
 
-bool fona_dummy::begin(Stream &port) {
+fona_dummy::fona_dummy(int pin) {
+    fonaSerial = nullptr;
+}
+
+bool fona_dummy::begin(HardwareSerial *port) {
+    fonaSerial = port;
     fonaSerial->begin(9600);
     return true;
 }
 
 bool fona_dummy::sendSMS(char *smsaddr, char *smsmsg){ return true;}
 
-int fona_dummy::available() { return fonaSerial->available(); }
+int fona_dummy::available() {
+    return fonaSerial->available();
+}
 
 int fona_dummy::read() {
     return fonaSerial->read();

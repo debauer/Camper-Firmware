@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <unity.h>
-#include "sim808.h"
+#include "../lib/sim808/sim808.h"
 
 void test_sim808_imei() {
     char imei[16] = {0}; // MUST use a 16 character buffer for IMEI!

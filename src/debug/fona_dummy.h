@@ -1,4 +1,4 @@
-//class Heater_Ctl
+//class pin_ctl
 // Created by debauer on 20.12.21.
 //
 
@@ -11,7 +11,8 @@ class fona_dummy;
 
 class fona_dummy {
 public:
-    bool begin(Stream &port);
+    explicit fona_dummy(int pin);
+    bool begin(HardwareSerial *port);
     bool sendSMS(char *smsaddr, char *smsmsg);
     int available();
     int read();
@@ -22,6 +23,8 @@ public:
     bool readSMS(uint8_t message_index, char *smsbuff, uint16_t maxlen, uint16_t *readlen);
     bool getSMSSender(uint8_t message_index, char *sender, int senderlen);
     uint8_t getIMEI(char *imei);
+
+    HardwareSerial *fonaSerial;
 };
 
 
