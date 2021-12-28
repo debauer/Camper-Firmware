@@ -26,7 +26,7 @@ int fona_dummy::read() {
 
 uint8_t fona_dummy::getIMEI(char *imei){
     strcpy(imei, "testimei");
-    return 8; // imei lenght
+    return 8; // _imei lenght
 }
 
 bool fona_dummy::getSMSSender(uint8_t message_index, char *sender, int senderlen) {

@@ -7,7 +7,8 @@
 
 class fona_dummy;
 
-#include "global.h"
+#include "Arduino.h"
+#include "Adafruit_FONA.h"
 
 class fona_dummy {
 public:
