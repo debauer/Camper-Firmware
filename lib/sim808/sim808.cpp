@@ -59,12 +59,12 @@ int SIM808::update_rssi(){
     if ((n >= 2) && (n <= 30)) {
       r = map(n, 2, 30, -110, -54);
     }
-    rssi = r;
-    return rssi;
+    _rssi = r;
+    return _rssi;
 }
 
 int SIM808::get_rssi(){
-    return rssi;
+    return _rssi;
 }
 
 Network_State SIM808::update_network_status(){
@@ -86,12 +86,12 @@ void SIM808::delete_sms(int slot){
 }
 
 void SIM808::update_imei(){
-    fona->getIMEI(imei);
+    fona->getIMEI(_imei);
 }
 
 void SIM808::print_imei(){
     Serial.print("SIM808 IMEI: ");
-    Serial.println(imei);
+    Serial.println(_imei);
 }
 
 void SIM808::send_sms(char *number, char *sms_text){
@@ -110,116 +110,130 @@ void SIM808::send_sms(char *number, char *sms_text){
     }
 }
 
-#define TIMEOUT 1000
-char SMS_buffer[SIM808_SMS_BUFFERSIZE];
-SMS sms[SMS_QUEUE_SIZE];
 
 // incoming message looks like:
 // +CMGL: 11,"REC UNREAD","+49123456789","","21/11/15,21:47:27+04"\n
 // Test 133\n
 // \n
 
+void SIM808::clear_sms_cache(){
+    // we check for
+    for(int i = 0; i < SMS_QUEUE_SIZE; i++){
+        _sms[i].status = SMS_UNDEF;
+        _sms[i].slot = 0;
+    }
+}
+
 void SIM808::parse_sms(uint16_t msg_size){
     int sms_count = 0;
+    clear_sms_cache();
     for(int i = 0; i < msg_size; i++){
-        if (strncmp(&SMS_buffer[i], "+CMGL", 5) == 0) {
+        if (strncmp(&_sms_buffer[i], "+CMGL", 5) == 0) {
             // found sms
             Serial.print(F("PARSE_SMS: found at "));
             Serial.println(i);
 
             // ======= SLOT =======
             i = i + 7; // set on first number of slot
-            sms[sms_count].slot = 0;
-            while(SMS_buffer[i] >= '0' && SMS_buffer[i] <= '9' ){
-                sms[sms_count].slot = sms[sms_count].slot * 10 + SMS_buffer[i] - '0';
+            _sms[sms_count].slot = 0;
+            while(_sms_buffer[i] >= '0' && _sms_buffer[i] <= '9' ){
+                _sms[sms_count].slot = _sms[sms_count].slot * 10 + _sms_buffer[i] - '0';
                 i++;
             }
             Serial.print(F("PARSE_SMS: slot "));
-            Serial.println(sms[sms_count].slot);
+            Serial.println(_sms[sms_count].slot);
 
 
             // ======= SMS STATUS =======
             i = i + 2;
             Serial.print(F("PARSE_SMS: status "));
 
-            if (SMS_buffer[i] == 'R'){
-                if(SMS_buffer[i+4] == 'U'){
-                    sms->status = SMS_REC_UNREAD;
+            if (_sms_buffer[i] == 'R'){
+                if(_sms_buffer[i+4] == 'U'){
+                    _sms[sms_count].status = SMS_REC_UNREAD;
                     Serial.println("SMS_REC_UNREAD");
                     i = i + 10;
                 }
-                if(SMS_buffer[i+4] == 'R'){
-                    sms->status = SMS_REC_READ;
+                if(_sms_buffer[i+4] == 'R'){
+                    _sms[sms_count].status = SMS_REC_READ;
                     Serial.println("SMS_REC_READ");
                     i = i + 8;
                 }
             }
-            else if (SMS_buffer[i] == 'S'){
-                if(SMS_buffer[i+4] == 'U'){
-                    sms->status = SMS_STO_UNSENT;
+            else if (_sms_buffer[i] == 'S'){
+                if(_sms_buffer[i+4] == 'U'){
+                    _sms[sms_count].status = SMS_STO_UNSENT;
                     Serial.println("SMS_STO_UNSENT");
                     i = i + 10;
                 }
-                if(SMS_buffer[i+4] == 'S'){
-                    sms->status = SMS_STO_SENT;
+                if(_sms_buffer[i+4] == 'S'){
+                    _sms[sms_count].status = SMS_STO_SENT;
                     Serial.println("SMS_STO_SENT");
                     i = i + 8;
                 }
             }
-            else if (SMS_buffer[i] == 'A'){
-                sms->status = SMS_ALL;
+            else if (_sms_buffer[i] == 'A'){
+                _sms[sms_count].status = SMS_ALL;
                 Serial.println("SMS_ALL");
                 i = i + 7;
             }else{
-                sms->status = SMS_UNDEF;
+                _sms[sms_count].status = SMS_UNDEF;
                 Serial.println("UNKNOWN");
             }
 
 
             // ======= TELEPHONE NUMBER =======
             i = i + 3;
-            for(int j = 0; SMS_buffer[i] != '"'; j++){
-                sms[sms_count].number[j] = SMS_buffer[i++];
-                sms[sms_count].number[j+1] = 0;
+            for(int j = 0; _sms_buffer[i] != '"'; j++){
+                _sms[sms_count].number[j] = _sms_buffer[i++];
+                _sms[sms_count].number[j+1] = 0;
             }
             Serial.print(F("PARSE_SMS: number "));
-            Serial.println(sms[sms_count].number);
+            Serial.println(_sms[sms_count].number);
             i = i+3;
-            if(SMS_buffer[i] == '"') i = i+3;
+            if(_sms_buffer[i] == '"') i = i+3;
             else{
-                while(SMS_buffer[i++] != '"');
+                while(_sms_buffer[i++] != '"');
                 i = i+2;
             }
 
             // ======= DATE / TIME =======
-            for(int j = 0; SMS_buffer[i] != '"'; j++){
-                sms[sms_count].datetime[j] = SMS_buffer[i];
-                sms[sms_count].datetime[j+1] = 0;
+            for(int j = 0; _sms_buffer[i] != '"'; j++){
+                _sms[sms_count].datetime[j] = _sms_buffer[i];
+                _sms[sms_count].datetime[j+1] = 0;
                 i++;
             }
             Serial.print(F("PARSE_SMS: date/time "));
-            Serial.println(sms[sms_count].datetime);
+            Serial.println(_sms[sms_count].datetime);
             i = i+2;
 
             // ======= MESSAGE =======
-            for(int j = 0; SMS_buffer[i] != '\n'; j++){
-                sms[sms_count].message[j] = SMS_buffer[i++];
-                sms[sms_count].message[j+1] = 0;
+            for(int j = 0; _sms_buffer[i] != '\n'; j++){
+                _sms[sms_count].message[j] = _sms_buffer[i++];
+                _sms[sms_count].message[j+1] = 0;
             }
 
             Serial.print(F("PARSE_SMS: message "));
-            Serial.println(sms[sms_count].message);
+            Serial.println(_sms[sms_count].message);
             sms_count++;
         }
 
     }
 }
 
+void SIM808::analyze_sms(){
+    for(int i = 0; i < SMS_QUEUE_SIZE; i++){
+        if(_sms[i].slot){
+
+        }
+    }
+}
+
 void SIM808::poll_sms(){
-    uint16_t replyidx = 0;
+    uint16_t replay_lenght = 0;
     int timeout = TIMEOUT;
     for(int i = 0; i<SIM808_SMS_BUFFERSIZE; i++ ){
-         SMS_buffer[i] = 0;
+         _sms_buffer[i] = 0;
     }
     while(fonaSerial->available() > 0) {
         fonaSerial->read();
@@ -230,7 +244,7 @@ void SIM808::poll_sms(){
     fonaSerial->print("AT+CMGL=\"ALL\"\n");
     delay(10);
     while (timeout--) {
-        if (replyidx >= SIM808_SMS_BUFFERSIZE - 1) {
+        if (replay_lenght >= SIM808_SMS_BUFFERSIZE - 1) {
             Serial.println("======= REPLYBUFFER FULL =======");
             break;
         }
@@ -238,13 +252,14 @@ void SIM808::poll_sms(){
             char c = fonaSerial->read();
             if (c == '\r')
                 continue;
-            SMS_buffer[replyidx] = c;
-            replyidx++;
+            _sms_buffer[replyidx] = c;
+            replay_lenght++;
             timeout = TIMEOUT;
         }
         delay(1);
     }
-    parse_sms(replyidx);
+    parse_sms(replay_lenght);
+    analyze_sms();
 }
 
 void SIM808::loop(){

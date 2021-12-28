@@ -16,6 +16,9 @@ class SIM808;
 #define SMS_PHONE_NUMBER_LENGHT 32
 #define SIM808_SMS_BUFFERSIZE (1024*2)
 
+
+#define TIMEOUT 1000
+
 #ifdef UNIT_TEST
     #define FONA_LIB fona_dummy
 #else
@@ -73,17 +76,21 @@ protected:
 
     // SMS
     void parse_sms(uint16_t msg_size);
+    void analyze_sms();
+    void clear_sms_cache();
 
     // VARS
     Network_State network_state;
-    int rssi;
-    char imei[16] = {0}; // MUST use a 16 character buffer for IMEI!
+    int _rssi;
+    char _imei[16] = {0}; // MUST use a 16 character buffer for IMEI!
 
     // PINS
     int _pin_power;
     int _pin_status;
     int _pin_reset_relay;
     int _pin_reset;
+    char _sms_buffer[SIM808_SMS_BUFFERSIZE];
+    SMS _sms[SMS_QUEUE_SIZE];
 
     HardwareSerial *fonaSerial;
     Adafruit_FONA *fona;
