@@ -1,4 +1,4 @@
-//class pin_ctl
+//class pin
 // Created by debauer on 20.12.21.
 //
 

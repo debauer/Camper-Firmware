@@ -2,8 +2,8 @@
 // Created by debauer on 20.12.21.
 //
 
-#ifndef SIM808_PIN_CTL_H
-#define SIM808_PIN_CTL_H
+#ifndef SIM808_CTL_H
+#define SIM808_CTL_H
 
 class pin_ctl;
 
@@ -39,4 +39,4 @@ class pin_ctl {
 };
 
 
-#endif //SIM808_PIN_CTL_H
+#endif //SIM808_CTL_H

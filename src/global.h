@@ -8,10 +8,9 @@
 #include "Adafruit_FONA.h"
 #include "LiquidCrystal_I2C.h"
 #include "cppQueue.h"
-#include "../lib/sim808/sim808.h"
-#include "../lib/timer/timer.h"
-
-#include "../lib/pin_ctl/pin_ctl.h"
+#include "sim808/sim808.h"
+#include "timer/timer.h"
+#include "pin/ctl.h"
 
 #ifdef UNIT_TEST
 #include "debug/fona_dummy.h"
@@ -19,7 +18,6 @@
 
 #define DEBUG
 #define SIM808_DUMMY
-
 
 #define EXTERN
 
@@ -57,5 +55,3 @@ EXTERN char temperature;
 #endif
 
 #endif //SIM808_GLOBAL_H
-
-#include "../lib/sim808/sim808.h"

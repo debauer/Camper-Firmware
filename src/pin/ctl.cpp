@@ -2,7 +2,7 @@
 // Created by debauer on 20.12.21.
 //
 
-#include "pin_ctl.h"
+#include "ctl.h"
 
 
 pin_ctl::pin_ctl() {

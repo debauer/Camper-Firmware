@@ -217,15 +217,12 @@ void SIM808::parse_sms(uint16_t msg_size){
             Serial.println(_sms[sms_count].message);
             sms_count++;
         }
-
     }
 }
 
 void SIM808::analyze_sms(){
     for(int i = 0; i < SMS_QUEUE_SIZE; i++){
         if(_sms[i].slot){
-
-
             // delete_sms(_sms[i].slot);
         }
     }
